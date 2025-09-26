@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Amazon Clothing{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1><i class="fas fa-tshirt me-3"></i>Fashion Forward</h1>
+            <p class="lead">Discover the latest trends in clothing and fashion. Quality meets style.</p>
+            <button class="btn btn-amazon btn-lg" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="fas fa-plus me-2"></i>Add New Product
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Products Section -->
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center display-5 fw-bold mb-1">
+                <i class="fas fa-star me-3 text-warning"></i>
+                Featured Products
+                <i class="fas fa-star ms-3 text-warning"></i>
+            </h2>
+            <p class="text-center text-muted fs-5">Browse our curated collection</p>
+        </div>
+    </div>
+    
+    {% if prod %}
+        <div class="row g-4">
+            {% for product in prod %}
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="product-card h-100">
+                        <div class="image-container">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}">
+                            {% else %}
+                                <div class="placeholder-image">
+                                    <i class="fas fa-image text-muted"></i>
+                                    <p class="text-muted mt-2">No Image</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column p-4">
+                            <h4 class="product-title mb-3">{{ product.name }}</h4>
+                            <p class="product-description flex-grow-1 mb-3">{{ product.desc|truncatewords:20 }}</p>
+                            
+                            <div class="product-footer mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="price-tag fs-4">₹{{ product.price }}</span>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'update_data' product.id %}" class="btn btn-outline-primary btn-sm" title="Edit Product">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="openDeleteModal({{ product.id }}, '{{ product.name }}')" title="Delete Product">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-amazon w-100 fw-bold">
+                                    <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="empty-state">
+                <i class="fas fa-box-open text-muted mb-4"></i>
+                <h3 class="display-6 text-muted mb-3">No Products Available</h3>
+                <p class="lead text-muted mb-4">Start by adding your first product to showcase your collection!</p>
+                <button class="btn btn-amazon btn-lg" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="fas fa-plus me-2"></i>Add Your First Product
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Floating Action Button -->
+<button class="floating-add-btn" data-bs-toggle="modal" data-bs-target="#addProductModal" title="Add New Product">
+    <i class="fas fa-plus"></i>
+</button>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h4 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Product
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                <div class="modal-body p-4">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label fs-6 fw-bold">
+                                    <i class="fas fa-tag me-2 text-primary"></i>Product Name
+                                </label>
+                                {{ form.name }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.price.id_for_label }}" class="form-label fs-6 fw-bold">
+                                    <i class="fas fa-rupee-sign me-2 text-success"></i>Price
+                                </label>
+                                {{ form.price }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.image.id_for_label }}" class="form-label fs-6 fw-bold">
+                                    <i class="fas fa-camera me-2 text-warning"></i>Product Image
+                                </label>
+                                {{ form.image }}
+                                <div class="form-text">Recommended: 400x300px or similar ratio</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="{{ form.desc.id_for_label }}" class="form-label fs-6 fw-bold">
+                                    <i class="fas fa-align-left me-2 text-info"></i>Description
+                                </label>
+                                {{ form.desc }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-amazon btn-lg">
+                        <i class="fas fa-save me-2"></i>Save Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h4 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="fas fa-trash text-danger mb-3" style="font-size: 3rem;"></i>
+                    <h5>Are you sure you want to delete "<span id="deleteProductName" class="fw-bold"></span>"?</h5>
+                    <p class="text-muted mt-3">This action cannot be undone.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <form method="post" id="deleteForm" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="fas fa-trash me-2"></i>Delete Forever
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openDeleteModal(id, name) {
+        document.getElementById('deleteProductName').textContent = name;
+        document.getElementById('deleteForm').action = `/delete_data/${id}`;
+        
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+
+    // Add loading state to forms
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+                submitBtn.disabled = true;
+            }
+        });
+    });
+</script>
+{% endblock %}
